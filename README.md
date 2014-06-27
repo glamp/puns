@@ -1,6 +1,6 @@
-# The Punning Playtpus
+# Puns!
 
 Puns, puns, puns, puns, puns
 
 
-![](./public/img/platypus.png)
+![](./public/img/platypus-quote.png)
