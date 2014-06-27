@@ -10,7 +10,8 @@ var express = require('express'),
   request = require('request'),
   cheerio = require('cheerio'),
   time = require('time'),
-  CronJob = require('cron').CronJob;;
+  CronJob = require('cron').CronJob,
+  twilio = require('twilio')(process.env["TWILIO_SID"], process.env["TWILIO_TOKEN"]);
 
 
 /*
@@ -54,6 +55,16 @@ app.configure('development', function(){
 });
 
 
+// send a pun...
+function sendPun(phoneNumber, pun, fn) {
+  twilio.sendMessage({
+    to: phoneNumber.toString(),
+    from: process.env["TWILIO_PHONE"],
+    body: pun
+  }, function(err, data) {
+    fn(err, data);
+  });
+}
 
 // Get a pun...
 function getPun(fn) {
@@ -62,7 +73,7 @@ function getPun(fn) {
       $ = cheerio.load(body);
       var rating = true
         , text = $('.dropshadow1').first().text().trim();
-      if (! rating) {
+      if (!rating) {
         getPun(fn);
       } else {
         fn(null, text);
@@ -75,15 +86,16 @@ function getPun(fn) {
 
 var letsPun = new CronJob('* * 9 * * *', function() {
   var fuse = Math.random()*5*60*60*1000;
-  console.log("starting. fuse set for " + fuse + " miliseconds");
+  console.log("[INFO]: starting. fuse set for " + fuse + " miliseconds");
   setTimeout(function() {
     getPun(function(err, pun) {
-      console.log(pun);
-      /* 
-       * punPeople.forEach(punPerson) {
-       *   sendPun(punPerson.phoneNumber, pun);
-       * });
-       */
+      punPeople.forEach(punPerson) {
+        sendPun(punPerson.phoneNumber, pun, function(err, rsp) {
+          if (err) {
+            console.log("[ERROR]: error sending pun to " + punPerson.phoneNumber + ". error: " + err);
+          }
+        });
+      });
     });
   }, fuse);
 }, null, true, "America/New_York");
@@ -124,5 +136,5 @@ app.get('*', function(req, res) {
 
 
 http.createServer(app).listen(app.get('port'), function() {
-  console.log("Express server listening on port " + app.get('port'));
+  console.log("[INFO]: Express server listening on port " + app.get('port'));
 });
