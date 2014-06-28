@@ -185,6 +185,8 @@ app.post('/pun', function(req, res) {
 });
 
 app.post('/sms', function(req, res) {
+  console.log(req.body);
+  console.log(req.body.Body);
   if (req.body.Body) {
     if (req.body.Body.toLowerCase()=="stop") {
       punEnthusiasts = punEnthusiasts.filter(function(punEnthusiast) {
