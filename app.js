@@ -193,6 +193,11 @@ app.post('/sms', function(req, res) {
       }
       return true;
       });
+      savePunEnthusiasts(punEnthusiasts, function(err, data) {
+        if (err) {
+          console.log("[ERROR]: could not save enthusiasts");
+        }
+      });
       sendPun(req.body.From, "You've been unsubscribed :(", function(err, resp) {
         res.send({ status: "OK" });
       });
