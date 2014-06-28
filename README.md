@@ -8,7 +8,7 @@ Puns, puns, puns, puns, puns
 
 ### go
 ```bash
-$ export TWILIO_PHONE="1+5555555555"
+$ export TWILIO_PHONE="+15555555555"
 $ export TWILIO_SID="abcd1234"
 $ export TWILIO_TOKEN="efgh5678"
 $ node app.js
