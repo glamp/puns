@@ -141,6 +141,41 @@ app.post('/pun', function(req, res) {
   }
 });
 
+app.post('/sms', function(req, res) {
+  if (req.body.Body) {
+    if (req.body.Body.toLowerCase()=="stop") {
+      punEnthusiasts = punEnthusiasts.filter(function(punEnthusiast) {
+      if (req.body.From.indexOf(punEnthusiast.phoneNumber) > -1) {
+        return false;
+      }
+      return true;
+      });
+      sendPun(req.body.From, "You've been unsubscribed :(", function(err, resp) {
+        res.send({ status: "OK" });
+      });
+    } else if (req.body.Body.toLowerCase()=="stop") {
+      getPun(function(err, pun) {
+        sendPun(req.body.From, pun, function(err, rsp) {
+          if (err) {
+            res.send({ status: "ERROR", message: "Could not send pun :(" });
+          } else {
+            res.send({
+              status: "OK",
+              message: "Pun sent!",
+              pun: pun,
+              sentAt: rsp.date_created
+            });
+          }
+        });
+      });
+    } else {
+      res.send({ status: "OK", message: "Not sure what you mean by that" });
+    }
+  } else {
+    res.send({ status: "ERROR", message: "Zer was no body" });
+  }
+});
+
 /*
  * Routes for Robots/404
  */
