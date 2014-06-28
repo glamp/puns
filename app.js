@@ -157,6 +157,11 @@ app.post('/', function(req, res) {
         console.log("[ERROR]: error saving punEnthusiasts");
       }
     });
+    sendPun(req.body.phone, "Welcome! To get extra puns, text 'more' to this number", function(err, resp) {
+      if (err) {
+        console.log("[ERROR]: could not send welcome pun :(");
+      }
+    });
     res.render('success');
   } else {
     res.render('fail', { fact: "The platypus is generally regarded as nocturnal and crepuscular, but individuals are also active during the day, particularly when the sky is overcast."});
