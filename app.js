@@ -18,7 +18,7 @@ var express = require('express'),
  * Initiate Express
  */
 var app = express()
-  , punPeople = [];
+  , punEnthusiasts = [];
 
 
 /* 
@@ -89,10 +89,10 @@ var letsPun = new CronJob('* * 9 * * *', function() {
   console.log("[INFO]: starting. fuse set for " + fuse + " miliseconds");
   setTimeout(function() {
     getPun(function(err, pun) {
-      punPeople.forEach(punPerson) {
-        sendPun(punPerson.phoneNumber, pun, function(err, rsp) {
+      punEnthusiasts.forEach(function(punEnthusiast) {
+        sendPun(punEnthusiast.phoneNumber, pun, function(err, rsp) {
           if (err) {
-            console.log("[ERROR]: error sending pun to " + punPerson.phoneNumber + ". error: " + err);
+            console.log("[ERROR]: error sending pun to " + punEnthusiast.phoneNumber + ". error: " + err);
           }
         });
       });
@@ -112,7 +112,7 @@ app.get('/', function(req, res) {
 
 app.post('/', function(req, res) {
   if (req.body.phone) {
-    punPeople.push({ phoneNumber: req.body.phone });
+    punEnthusiasts.push({ phoneNumber: req.body.phone });
     res.render('success');
   } else {
     res.render('fail', { fact: "The platypus is generally regarded as nocturnal and crepuscular, but individuals are also active during the day, particularly when the sky is overcast."});
