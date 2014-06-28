@@ -11,7 +11,8 @@ var express = require('express'),
   cheerio = require('cheerio'),
   time = require('time'),
   CronJob = require('cron').CronJob,
-  twilio = require('twilio')(process.env["TWILIO_SID"], process.env["TWILIO_TOKEN"]);
+  twilio = require('twilio')(process.env["TWILIO_SID"], process.env["TWILIO_TOKEN"]),
+  GitHub = require('github-api');
 
 
 /*
@@ -55,6 +56,43 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+
+function getPunEnthusiasts(fn) {
+  var github = new GitHub({
+    username: process.env["GITHUB_USER"],
+    password: process.env["GITHUB_PASSWORD"],
+    auth: "basic"
+  });
+  var gist = github.getGist("5e8c435a88741f73caf5");
+  gist.read(function(err, gist) {
+    enthusiasts = gist.files["punenthusiasts.json"].content;
+    enthusiasts = JSON.parse(enthusiasts);
+    fn(err, enthusiasts);
+  });
+}
+
+getPunEnthusiasts(function(err, enthusiasts) {
+  if (err) {
+    console.log("[ERROR]: error fetching gist.db; " + err);
+  } else {
+    punEnthusiasts = enthusiasts;
+  }
+});
+
+function savePunEnthusiasts(data, fn) {
+  var github = new GitHub({
+    username: process.env["GITHUB_USER"],
+    password: process.env["GITHUB_PASSWORD"],
+    auth: "basic"
+  });
+  var gist = github.getGist("5e8c435a88741f73caf5");
+  gist.read(function(err, currentGist) {
+    currentGist.files["punenthusiasts.json"].content = JSON.stringify(data, null, 2);
+    gist.update(currentGist, function(err, gist) {
+      fn(err, gist);
+    });
+  });
+}
 
 // send a pun...
 function sendPun(phoneNumber, pun, fn) {
@@ -114,6 +152,11 @@ app.get('/', function(req, res) {
 app.post('/', function(req, res) {
   if (req.body.phone) {
     punEnthusiasts.push({ phoneNumber: req.body.phone });
+    savePunEnthusiasts(punEnthusiasts, function(err, data) {
+      if (err) {
+        console.log("[ERROR]: error saving punEnthusiasts");
+      }
+    });
     res.render('success');
   } else {
     res.render('fail', { fact: "The platypus is generally regarded as nocturnal and crepuscular, but individuals are also active during the day, particularly when the sky is overcast."});
@@ -184,6 +227,10 @@ app.get('/robots.txt', function(req, res) {
     res.header('Content-Type', 'text/plain');
     res.send(data);
   });
+});
+
+app.get('/status', function(req, res) {
+  res.send({ status: "OK", data: punEnthusiasts });
 });
 
 app.get('*', function(req, res) {
