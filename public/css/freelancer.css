@@ -453,6 +453,7 @@ p.speech
     -moz-box-shadow: 2px 2px 4px #888;
     box-shadow: 2px 2px 4px #888;
     color: black;
+    right: -50px;
 }
 
 p.speech:before
