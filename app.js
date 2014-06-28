@@ -185,8 +185,6 @@ app.post('/pun', function(req, res) {
 });
 
 app.post('/sms', function(req, res) {
-  console.log(JSON.stringify(req.body));
-  console.log(JSON.stringify(req.body.Body));
   if (req.body.Body) {
     if (req.body.Body.toLowerCase()=="stop") {
       punEnthusiasts = punEnthusiasts.filter(function(punEnthusiast) {
@@ -203,7 +201,7 @@ app.post('/sms', function(req, res) {
       sendPun(req.body.From, "You've been unsubscribed :(", function(err, resp) {
         res.send({ status: "OK" });
       });
-    } else if (req.body.Body.toLowerCase()=="stop") {
+    } else if (req.body.Body.toLowerCase()=="more") {
       getPun(function(err, pun) {
         sendPun(req.body.From, pun, function(err, rsp) {
           if (err) {
