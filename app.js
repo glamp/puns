@@ -44,6 +44,7 @@ app.configure(function() {
   }));
   app.use(express.static(path.join(__dirname, 'public')));
 
+  app.use(express.bodyParser());
   app.use(express.favicon());
   app.use(express.logger('dev')); 
   app.use(express.methodOverride());
@@ -119,6 +120,26 @@ app.post('/', function(req, res) {
   }
 });
 
+app.post('/pun', function(req, res) {
+  if (req.body.phone) {
+    getPun(function(err, pun) {
+      sendPun(req.body.phone, pun, function(err, rsp) {
+        if (err) {
+          res.send({ status: "ERROR", message: "Could not send pun :(" });
+        } else {
+          res.send({
+            status: "OK",
+            message: "Pun sent!",
+            pun: pun,
+            sentAt: rsp.date_created
+          });
+        }
+      });
+    });
+  } else {
+    res.send({ status: "ERROR", message: "You didn't include the `phone` parameter" });
+  }
+});
 
 /*
  * Routes for Robots/404
