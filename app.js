@@ -96,6 +96,8 @@ function savePunEnthusiasts(data, fn) {
 
 // send a pun...
 function sendPun(phoneNumber, pun, fn) {
+  fn(null, null);
+  /*
   twilio.sendMessage({
     to: phoneNumber.toString(),
     from: process.env["TWILIO_PHONE"],
@@ -103,6 +105,7 @@ function sendPun(phoneNumber, pun, fn) {
   }, function(err, data) {
     fn(err, data);
   });
+  */
 }
 
 // Get a pun...
