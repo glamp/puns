@@ -24,3 +24,8 @@ $(function() {
 $('body').scrollspy({
     target: '.navbar-fixed-top'
 })
+
+if ($(window).width() < 1307) {
+  console.log("adding mobile-platypus");
+  $(".speech").addClass("mobile-platypus");
+}

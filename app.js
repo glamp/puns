@@ -9,9 +9,9 @@ var express = require('express'),
   lessMiddleware = require('less-middleware'),
   request = require('request'),
   cheerio = require('cheerio'),
-  time = require('time'),
-  CronJob = require('cron').CronJob,
+  schedule = require('node-schedule'),
   twilio = require('twilio')(process.env["TWILIO_SID"], process.env["TWILIO_TOKEN"]),
+  tz_offset = parseInt(process.env["tz_offset"]) || -4;
   GitHub = require('github-api');
 
 
@@ -71,6 +71,7 @@ function getPunEnthusiasts(fn) {
   });
 }
 
+/*
 getPunEnthusiasts(function(err, enthusiasts) {
   if (err) {
     console.log("[ERROR]: error fetching gist.db; " + err);
@@ -78,6 +79,7 @@ getPunEnthusiasts(function(err, enthusiasts) {
     punEnthusiasts = enthusiasts;
   }
 });
+*/
 
 function savePunEnthusiasts(data, fn) {
   var github = new GitHub({
@@ -96,8 +98,6 @@ function savePunEnthusiasts(data, fn) {
 
 // send a pun...
 function sendPun(phoneNumber, pun, fn) {
-  fn(null, null);
-  /*
   twilio.sendMessage({
     to: phoneNumber.toString(),
     from: process.env["TWILIO_PHONE"],
@@ -105,12 +105,11 @@ function sendPun(phoneNumber, pun, fn) {
   }, function(err, data) {
     fn(err, data);
   });
-  */
 }
 
 // Get a pun...
 function getPun(fn) {
-  request('http://www.punoftheday.com/cgi-bin/randompun.pl', function (error, response, body) { 
+  request('http://www.punoftheday.com/cgi-bin/randompun.pl', function (err, response, body) { 
     if (!error && response.statusCode == 200) {
       $ = cheerio.load(body);
       var rating = true
@@ -121,29 +120,24 @@ function getPun(fn) {
         fn(null, text);
       }
     } else {
-      fn(error, null);
+      fn(err, null);
     }
   })
 }
 
-var letsPun = new CronJob('* * 9 * * *', function() {
-  var fuse = Math.random()*5*60*60*1000;
-  console.log("[INFO]: starting. fuse set for " + fuse + " miliseconds");
+var punExtravaganza = schedule.scheduleJob({ hour: 9 + tz_offset, minute: 30 }, function() {
+  var fuse = 1000*60*60 * (Math.random()*2);
+  console.log("[INFO]: fuse set for: " + fuse);
   setTimeout(function() {
     getPun(function(err, pun) {
-      punEnthusiasts.forEach(function(punEnthusiast) {
-        sendPun(punEnthusiast.phoneNumber, pun, function(err, rsp) {
-          if (err) {
-            console.log("[ERROR]: error sending pun to " + punEnthusiast.phoneNumber + ". error: " + err);
-          }
-        });
+      sendPun(punEnthusiast.phoneNumber, pun, function(err, rsp) {
+        if (err) {
+          console.log("[ERROR]: error sending pun to " + punEnthusiast.phoneNumber + ". error: " + err);
+        }
       });
     });
   }, fuse);
-}, null, true, "America/New_York");
-
-// let the punning...begin!!!
-letsPun.start();
+});
 
 /*
 * Routes for Index
@@ -154,6 +148,7 @@ app.get('/', function(req, res) {
 
 app.post('/', function(req, res) {
   if (req.body.phone) {
+    req.body.phone = req.body.phone.replace(/ -/g, '');
     punEnthusiasts.push({ phoneNumber: req.body.phone });
     savePunEnthusiasts(punEnthusiasts, function(err, data) {
       if (err) {
@@ -188,7 +183,10 @@ app.post('/pun', function(req, res) {
       });
     });
   } else {
-    res.send({ status: "ERROR", message: "You didn't include the `phone` parameter" });
+    res.send({
+      status: "ERROR",
+      message: "You didn't include the `phone` parameter"
+    });
   }
 });
 
