@@ -203,7 +203,11 @@ app.post('/sms', function(req, res) {
         res.send({ status: "OK" });
       });
     } else if (req.body.Body.toLowerCase()=="more") {
+      console.log("sending more...");
       getPun(function(err, pun) {
+        if (err) {
+          console.log("[ERROR]: error getting pun. " + err);
+        }
         sendPun(req.body.From, pun, function(err, rsp) {
           if (err) {
             res.send({ status: "ERROR", message: "Could not send pun :(" });
