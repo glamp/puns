@@ -71,7 +71,6 @@ function getPunEnthusiasts(fn) {
   });
 }
 
-/*
 getPunEnthusiasts(function(err, enthusiasts) {
   if (err) {
     console.log("[ERROR]: error fetching gist.db; " + err);
@@ -79,7 +78,6 @@ getPunEnthusiasts(function(err, enthusiasts) {
     punEnthusiasts = enthusiasts;
   }
 });
-*/
 
 function savePunEnthusiasts(data, fn) {
   var github = new GitHub({
@@ -139,9 +137,6 @@ var punExtravaganza = schedule.scheduleJob({ hour: 9 + tz_offset, minute: 30 }, 
   }, fuse);
 });
 
-/*
-* Routes for Index
-*/
 app.get('/', function(req, res) {
   res.render('index');
 });
@@ -230,9 +225,6 @@ app.post('/sms', function(req, res) {
   }
 });
 
-/*
- * Routes for Robots/404
- */
 app.get('/robots.txt', function(req, res) {
   fs.readFile(__dirname + "/robots.txt", function(err, data) {
     res.header('Content-Type', 'text/plain');
