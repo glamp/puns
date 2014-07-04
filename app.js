@@ -108,7 +108,7 @@ function sendPun(phoneNumber, pun, fn) {
 // Get a pun...
 function getPun(fn) {
   request('http://www.punoftheday.com/cgi-bin/randompun.pl', function (err, response, body) { 
-    if (!error && response.statusCode == 200) {
+    if (!err && response.statusCode == 200) {
       $ = cheerio.load(body);
       var rating = true
         , text = $('.dropshadow1').first().text().trim();
